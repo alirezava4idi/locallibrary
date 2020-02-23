@@ -1,5 +1,6 @@
 from django.shortcuts import render
 from catalog.models import Book, Author, BookInstance, Genre
+from django.views import generic
 
 def index(request):
     """View functions for home page of site."""
@@ -14,13 +15,26 @@ def index(request):
     #The all() in implied ny default.
     num_authors = Author.objects.count()
 
+    # genres and books that contain the word 'the'
+    num_thes = Book.objects.filter(title__icontains='the').count()
+    num_thes += Genre.objects.filter(name__icontains='the').count()
+
 
     context = {
         'num_books': num_books,
         'num_instances': num_instances,
         'num_instances_available': num_instances_available,
-        'num_authors': num_authors
+        'num_authors': num_authors,
+        'num_thes': num_thes
     }
 
     #Render the HTML template index.html with the data in the context variable
     return render(request, 'index.html', context=context)
+
+class BookListView(generic.ListView):
+    model = Book
+    paginate_by = 3
+
+
+class BookDetailView(generic.DetailView):
+    model = Book
